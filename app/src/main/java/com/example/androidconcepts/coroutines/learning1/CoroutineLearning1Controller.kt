@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class CoroutineLearning1Controller constructor(
+private class CoroutineLearning1Controller constructor(
     private val fibonacciUseCaseUsingCoroutine: FibonacciUseCaseUsingCoroutine,
     private val fibonacciUseCaseUsingCallback: FibonacciUseCaseUsingCallback
 ) {

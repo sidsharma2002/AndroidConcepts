@@ -1,4 +1,4 @@
-package com.example.androidconcepts.others.common
+package com.example.androidconcepts.common
 
 import android.os.Handler
 import android.os.Looper
