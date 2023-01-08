@@ -6,3 +6,5 @@ For eg: TextFormat can change (txt, docx etc) but in case of TextExtractor (extr
 ### cost of abstraction
 1) Abstraction make your code more complex. eg : if you see BMW: Car() then immediately thoughts would come in mind that are there any other realizations of Car too?
 2) Wrong abstractions can be extremely hard to fix later. 
+
+Having said that, if you've got a new change from business and there's an opportunity to make the system resilient to such changes, then go ahead and refactor abstractions out and use ocp.
