@@ -3,15 +3,18 @@ package com.example.androidconcepts.common
 import android.os.Handler
 import android.os.Looper
 
-class UiThreadPoster constructor(
-    private val handler: Handler = Handler(Looper.getMainLooper())
-) {
+open class UiThreadPoster {
+    private val handler: Handler? = getUiHandler() // returns null only in case of test double
 
-    fun post(runnable: Runnable) {
-        handler.post(runnable)
+    protected open fun getUiHandler(): Handler? {
+        return Handler(Looper.getMainLooper())
     }
 
-    fun postDelayed(delayTime: Long, runnable: Runnable) {
-        handler.postDelayed(runnable, delayTime)
+    open fun post(runnable: Runnable) {
+        handler!!.post(runnable)
+    }
+
+    open fun postDelayed(delayTime: Long, runnable: Runnable) {
+        handler!!.postDelayed(runnable, delayTime)
     }
 }

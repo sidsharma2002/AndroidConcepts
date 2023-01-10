@@ -1,5 +1,7 @@
 package com.example.androidconcepts.coroutines.learning1
 
+import com.example.androidconcepts.common.BgThreadPoster
+import com.example.androidconcepts.common.UiThreadPoster
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.Executors
@@ -15,17 +17,20 @@ class FibonacciUseCaseUsingCoroutine {
     }
 }
 
-class FibonacciUseCaseUsingCallback {
+class FibonacciUseCaseUsingCallback constructor(
+    private val bgThreadPoster: BgThreadPoster = BgThreadPoster(),
+    private val uiThreadPoster: UiThreadPoster = UiThreadPoster()
+) {
 
     interface Callback {
         fun onResult(fibonacciNumber: Int)
     }
 
-    private val taskPoolExecutor = Executors.newFixedThreadPool(3)
-
-    fun fetchFibonacciNumberAsync(n: Int, callback: Callback): Future<*> = taskPoolExecutor.submit {
+    fun fetchFibonacciNumberAsync(n: Int, callback: Callback) = bgThreadPoster.post {
         val result = getFibonacciNumber(n)
-        callback.onResult(fibonacciNumber = result)
+        uiThreadPoster.post {
+            callback.onResult(fibonacciNumber = result)
+        }
     }
 
     private fun getFibonacciNumber(n: Int): Int {
