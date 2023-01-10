@@ -12,6 +12,10 @@ open class BaseObservable<ListenerClass> {
         this.listeners.add(listener)
     }
 
+    fun unregisterListener(listener: ListenerClass) {
+        this.listeners.remove(listener)
+    }
+
     protected fun getAllListeners(): List<ListenerClass> {
         return listeners
     }
