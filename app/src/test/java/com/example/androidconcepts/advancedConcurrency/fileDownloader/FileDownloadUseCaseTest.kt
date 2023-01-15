@@ -13,31 +13,20 @@ import java.util.concurrent.TimeUnit
 class FileDownloadUseCaseTest {
 
     private var downloadedFile: DownloadedFile? = null
+    private val noopListener = object : FileDownloadUseCase.Listener {
+        override fun onFileResult(downloadedFile: DownloadedFile) {
+            /* no-op */
+        }
+    }
 
     @Test
     fun onSubmittingSameFileTwiceSync_downloadsOnlyOnce() {
         // arrange
-        val semaphore1 = Semaphore(0)
-        val semaphore2 = Semaphore(0)
-
         val file = File("file1", "some url1")
 
         // act
-        SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
-            override fun onFileResult(downloadedFile: DownloadedFile) {
-                semaphore1.release()
-            }
-        })
-
-        semaphore1.acquire()
-
-        SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
-            override fun onFileResult(downloadedFile: DownloadedFile) {
-                semaphore2.release()
-            }
-        })
-
-        semaphore2.acquire()
+        SUT.startDownloadFileAsync(file, noopListener).get()
+        SUT.startDownloadFileAsync(file, noopListener).get()
 
         // assert
         verify(exactly = 1) {
@@ -52,23 +41,15 @@ class FileDownloadUseCaseTest {
         val semaphore = Semaphore(-2)
 
         // act
-        SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
-            override fun onFileResult(downloadedFile: DownloadedFile) {
-                semaphore.release()
-            }
-        })
-
-        SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
-            override fun onFileResult(downloadedFile: DownloadedFile) {
-                semaphore.release()
-            }
-        })
-
-        SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
-            override fun onFileResult(downloadedFile: DownloadedFile) {
-                semaphore.release()
-            }
-        })
+        repeat(3) {
+            Thread {
+                SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
+                    override fun onFileResult(downloadedFile: DownloadedFile) {
+                        semaphore.release()
+                    }
+                })
+            }.start()
+        }
 
         semaphore.acquire()
 

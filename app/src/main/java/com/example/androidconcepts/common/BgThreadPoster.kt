@@ -1,5 +1,6 @@
 package com.example.androidconcepts.common
 
+import java.util.concurrent.Future
 import java.util.concurrent.SynchronousQueue
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
@@ -13,7 +14,7 @@ class BgThreadPoster {
         /* workQueue = */ SynchronousQueue()
     )
 
-    fun post(runnable: Runnable) {
-        taskExecutor.submit(runnable)
+    fun post(runnable: Runnable): Future<*> {
+        return taskExecutor.submit(runnable)
     }
 }

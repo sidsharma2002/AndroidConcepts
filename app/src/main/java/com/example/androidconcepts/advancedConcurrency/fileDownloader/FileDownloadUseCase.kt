@@ -2,6 +2,7 @@ package com.example.androidconcepts.advancedConcurrency.fileDownloader
 
 import com.example.androidconcepts.common.BgThreadPoster
 import com.example.androidconcepts.common.UiThreadPoster
+import java.util.concurrent.Future
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
@@ -20,19 +21,21 @@ class FileDownloadUseCase constructor(
 
     private val lock: Lock = ReentrantLock()
 
-    fun startDownloadFileAsync(file: File, listener: Listener) = bgThreadPoster.post {
-        lateinit var downloadedFile1 : DownloadedFile
+    fun startDownloadFileAsync(file: File, listener: Listener): Future<*> = bgThreadPoster.post {
+        lateinit var file1 : DownloadedFile
 
+        // problem : this block of code is synchronized even when the file names are different,
+        // this hurts performance by a great extent as the downloading io task also gets synchronized.
         lock.withLock {
-            downloadedFile1 = startDownloadSync(file)
+            file1 = getFromCacheOrDownloadFile(file)
         }
 
         uiThreadPoster.post {
-            listener.onFileResult(downloadedFile1)
+            listener.onFileResult(file1)
         }
     }
 
-    fun startDownloadSync(file: File): DownloadedFile {
+    private fun getFromCacheOrDownloadFile(file: File): DownloadedFile {
         if (cachedFiles.contains(file.name)) {
             return cachedFiles[file.name]!!
         }
