@@ -1,4 +1,4 @@
-package com.example.androidconcepts.advancedConcurrency.fileDownloaded
+package com.example.androidconcepts.advancedConcurrency.fileDownloader
 
 data class DownloadedFile(
     val name: String,
