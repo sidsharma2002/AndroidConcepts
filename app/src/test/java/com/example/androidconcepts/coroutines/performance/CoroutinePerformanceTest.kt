@@ -14,6 +14,7 @@ class CoroutinePerformanceTest {
         val addImageFiltersUseCase = AddImageFiltersUseCase()
         val coroutineScope = CoroutineScope(Dispatchers.Default)
         val noOfIterations = Runtime.getRuntime().availableProcessors() * 100 // to saturate default dispatcher
+        val eachTaskTime = 100
         val allTasksPostedCDL = CountDownLatch(noOfIterations)
         val startTime = System.currentTimeMillis()
 
@@ -23,14 +24,14 @@ class CoroutinePerformanceTest {
             // simulate background processing of images
             repeat(noOfIterations) {
                 launch {
-                    processImageUseCase.process()
+                    processImageUseCase.process(eachTaskTime)
                 }
 
                 allTasksPostedCDL.countDown()
             }
         }
 
-        allTasksPostedCDL.await(15, TimeUnit.SECONDS)
+        allTasksPostedCDL.await(eachTaskTime * noOfIterations * 1L, TimeUnit.SECONDS)
 
         // simulate user action
         val userJob = coroutineScope.launch {
