@@ -4,8 +4,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class ProcessImageUseCase {
-    suspend fun process(time: Int) = withContext(Dispatchers.Default) {
-        // simulate algorithm invocation for time ms
+    suspend fun process(time: Int) {
+        // simulate algorithm invocation for time ms in a "blocking manner".
         // (fake load just to avoid elimination optimization by compilers)
         val finishTimeMillis = System.currentTimeMillis() + time
         var counter = 0
