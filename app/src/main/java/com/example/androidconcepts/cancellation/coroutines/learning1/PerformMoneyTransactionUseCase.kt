@@ -17,11 +17,8 @@ class PerformMoneyTransactionUseCase {
     }
 
     private suspend fun performMoneyTransferNetworkCalls(): String = withContext(Dispatchers.IO) {
-        val connection: URLConnection = URL("https://stackoverflow.com/").openConnection()
-
         try {
             repeat(5) {
-                val response: InputStream = connection.getInputStream()
                 Log.d("debug", "$it")
                 blockingDelay(1000)
             }
