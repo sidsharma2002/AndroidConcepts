@@ -25,13 +25,17 @@ When all the code is executed in `saveResultInDb` then internally withContext th
 "debug : saved in db line 12" doesn't executes as `saveResultInDb` threw CancellationException.
 
 ->
-To fix this problem of suspend method running even when its scope was cancelled, we need to add a withContext to duplicated `performMoneyTransaction` and name it as `performMoneyTransactionFixed`. This runs the method in coroutine scope and after doing that isActive becomes false at the right time (reason is unclear).
-For debugging purpose lets add isActive in logs of `performMoneyTransferNetworkCalls` too like this : 
+For debugging purpose lets add isActive in logs of `performMoneyTransferNetworkCalls` too like this :
+```
     repeat(5) {
         Log.d("debug", "$it isActive : ${coroutineContext.isActive}")
         blockingDelay(1000)
     }
+```
 
+To fix this problem of suspend method running even when its scope was cancelled, we need to add a withContext to duplicated `performMoneyTransaction` and name it as `performMoneyTransactionFixed`. This runs the method in coroutine scope and after doing that isActive becomes false at the right time (reason is unclear).
+
+```
 suspend fun performMoneyTransactionFixed(): String = withContext(Dispatcher.IO) {
     val result = performMoneyTransferNetworkCalls()
     Log.d("debug", "network call result received : $result")
@@ -40,6 +44,7 @@ suspend fun performMoneyTransactionFixed(): String = withContext(Dispatcher.IO) 
     Log.d("debug", "saved in db line 12")
     return "transaction done successfully!"
 }
+```
 
 1. Output :
 2. debug 0 isActive : true
