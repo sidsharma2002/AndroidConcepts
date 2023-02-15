@@ -17,32 +17,26 @@ class PerformMoneyTransactionUseCase {
     }
 
     private suspend fun performMoneyTransferNetworkCalls(): String = withContext(Dispatchers.IO) {
-        try {
-            repeat(5) {
-                Log.d("debug", "$it")
-                blockingDelay(1000)
-            }
-
-            Log.d("debug", "network calls done, returning result")
-            return@withContext "done success"
-        } catch (e: Exception) { // CancellationException is not thrown here hence not caught!
-            Log.d("debug_error", "" + e.message)
-            e.printStackTrace()
-            return@withContext "done failure!"
+        repeat(5) {
+            Log.d("debug", "$it")
+            blockingDelay(1000)
         }
+
+        Log.d("debug", "network calls done, returning result")
+        return@withContext "done success"
     }
 
     private suspend fun saveResultInDb(result: String) = withContext(Dispatchers.IO) {
         Log.d("debug", " saving result started")
-        blockingDelay(2000)
+        blockingDelay(1000)
         Log.d("debug", " saved result started")
     }
+}
 
-    private fun blockingDelay(time: Long) {
-        val finalTime = System.currentTimeMillis() + time
-        var counter = 0;
-        while (System.currentTimeMillis() < finalTime) {
-            counter++;
-        }
+fun blockingDelay(time: Long) {
+    val finalTime = System.currentTimeMillis() + time
+    var counter = 0;
+    while (System.currentTimeMillis() < finalTime) {
+        counter++;
     }
 }
