@@ -17,7 +17,7 @@ class FileDownloadUseCase constructor(
     }
 
     private val cachedFiles: HashMap<String, DownloadedFile> =
-        hashMapOf() // concurrent hashmap doesn't work here for some reason.
+        hashMapOf() // concurrent hashmap doesn't work here for some reason but synchronized does.
 
     private val lock: Lock = ReentrantLock()
 
