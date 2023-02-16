@@ -4,6 +4,9 @@ import com.example.androidconcepts.jcip.common.ThreadContextSwitchTrigger;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * see AtomicServerTest.java
+ */
 public class WrongAtomicServer {
 
     private final AtomicLong hits = new AtomicLong(0);
