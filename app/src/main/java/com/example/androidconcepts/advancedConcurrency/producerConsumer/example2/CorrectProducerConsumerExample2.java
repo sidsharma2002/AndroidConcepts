@@ -12,7 +12,10 @@ public class CorrectProducerConsumerExample2 {
 
         while (true) {
             waitTillValueIsConsumed();
-            server.incrementAndPut();
+
+            int newValue = server.incrementAndPut();
+            System.out.println("put : " + newValue);
+
             markValueUnconsumedAndNotify();
 
             // to make it finite loop
@@ -43,18 +46,13 @@ public class CorrectProducerConsumerExample2 {
     }
 
     private final Runnable consumer = () -> {
-        int hits = 0;
-
         while (true) {
             waitTillValueBecomesUnconsumed();
-            server.get();
-            markValueConsumedAndNotify();
 
-            // to make it finite loop
-            hits++;
-            if (hits > 10000) {
-                return;
-            }
+            int value = server.get();
+            System.out.println("get : " + value);
+
+            markValueConsumedAndNotify();
         }
     };
 
@@ -77,7 +75,7 @@ public class CorrectProducerConsumerExample2 {
         }
     }
 
-    public void startExecution() throws InterruptedException {
+    public void startExecution() {
         new Thread(producer).start();
         new Thread(consumer).start();
     }
