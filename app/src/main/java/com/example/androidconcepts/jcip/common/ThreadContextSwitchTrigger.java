@@ -8,7 +8,7 @@ public class ThreadContextSwitchTrigger {
     }
 
     public void trigger() {
-        long finalTime = System.currentTimeMillis() + 100;
+        long finalTime = System.currentTimeMillis() + millis;
         int count = 0;
         while (System.currentTimeMillis() < finalTime) {
             Thread.yield();
