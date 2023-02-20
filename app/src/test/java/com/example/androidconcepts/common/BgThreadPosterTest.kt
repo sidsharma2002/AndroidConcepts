@@ -100,10 +100,10 @@ class BgThreadPosterTest {
 
             println("posted runnable1 ended " + Thread.currentThread().name)
         }.get()
-    }
 
-    // Explanation : here t2 waits for runnable3 to complete on t1 but t1 waits for runnable2 to complete on t2.
-    // see figure ->
-    // t1 : [runnable1 = line89, [get() on runnable2], line107] , [runnable3]
-    // t2 : [runnable2 = line92, [get() on runnable3], line104]
+        // Explanation : here t2 waits for runnable3 to complete on t1 but t1 waits for runnable2 to complete on t2.
+        // see figure ->
+        // t1 : [runnable1 = line89, [post runnable2], [get() on runnable2], line107] , [runnable3]
+        // t2 : [runnable2 = line92, [post runnable3], [get() on runnable3], line104]
+    }
 }

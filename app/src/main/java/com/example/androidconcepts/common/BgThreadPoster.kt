@@ -16,12 +16,14 @@ open class BgThreadPoster {
         /* workQueue = */ SynchronousQueue()
     )
 
-    open fun post(runnable: Runnable): Future<*> {
+    fun post(runnable: Runnable): Future<*> {
         return taskExecutor.submit(runnable)
     }
 }
 
 class BgThreadPosterDualThreaded : BgThreadPoster() {
+    // default override shows taskExecutor: ExecutorService get() = ...
+    // it will return new executor each time. this mistake wasted 20mins :/
     override val taskExecutor: ExecutorService = Executors.newFixedThreadPool(2)
 }
 
