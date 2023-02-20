@@ -12,7 +12,7 @@ public class VisibilityExampleTest {
 
     @Test
     public void correctVisibilityExampleTest() {
-        CorrectVisibilityExample SUT = new CorrectVisibilityExample();
+        NoVisibilityExample2 SUT = new NoVisibilityExample2();
         SUT.startExecution();
     }
 }

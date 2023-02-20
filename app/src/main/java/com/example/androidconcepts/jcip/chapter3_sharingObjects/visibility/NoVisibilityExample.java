@@ -16,7 +16,7 @@ public class NoVisibilityExample {
                 Thread.yield();
             }
 
-            System.out.println("value " + value); // may print value : 0 here due to visibility reordering.
+            System.out.println("value " + value); // may print value : 0 here due to reordering.
         }).start();
     }
 
@@ -27,7 +27,7 @@ public class NoVisibilityExample {
 
         // Reordering can happen in this :
         // though we are making data change to first value and then ready, it might be the case
-        // that ready becomes true prior to the value because writes to value and read are independent to each other.
+        // that ready becomes true prior to the value because writes to value and ready are independent to each other.
         value = 40;
         ready = true;
 
