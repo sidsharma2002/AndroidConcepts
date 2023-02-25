@@ -7,14 +7,18 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.androidconcepts.R
+import com.google.android.material.slider.RangeSlider
+import com.google.android.material.slider.Slider
+import com.google.android.material.slider.Slider.OnSliderTouchListener
 import org.opencv.android.BaseLoaderCallback
 import org.opencv.android.CameraBridgeViewBase
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener
 import org.opencv.android.LoaderCallbackInterface
 import org.opencv.android.OpenCVLoader
-import org.opencv.core.Mat
-import org.opencv.core.Size
+import org.opencv.core.*
+import org.opencv.core.Mat.eye
 import org.opencv.imgproc.Imgproc
+import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
 
@@ -37,12 +41,25 @@ class OCVActivity1 : AppCompatActivity() {
     }
 
     @Volatile
-    private var blurR: Int = 0
+    private var mValue: Int = 0
+
+    private lateinit var slider: Slider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ocvactivity1)
         load()
+
+        slider = findViewById(R.id.slider)
+
+        slider.addOnSliderTouchListener(object : OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {
+                mValue = slider.value.toInt() * 100
+            }
+
+            override fun onStopTrackingTouch(slider: Slider) {
+            }
+        })
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(
@@ -66,18 +83,16 @@ class OCVActivity1 : AppCompatActivity() {
 
             override fun onCameraFrame(inputFrame: Mat?): Mat {
                 // get current camera frame as OpenCV Mat object
-                val mat = inputFrame
+                val mat = inputFrame ?: return Mat()
 
-                // native call to process current camera frame
-                try {
-                    if (mat != null)
-                        Imgproc.blur(mat, mat, Size((blurR).toDouble(), (blurR).toDouble()))
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
+                // convert to grayscale
+                Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY)
+
+                // main algorithm
+                adaptiveThresholdFromJNI(mat.nativeObjAddr)
 
                 // return processed frame for live preview
-                return mat ?: Mat()
+                return mat
             }
         })
     }

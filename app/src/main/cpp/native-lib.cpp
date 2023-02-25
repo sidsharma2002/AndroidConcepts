@@ -16,6 +16,19 @@ Java_com_example_androidconcepts_opencv_learning1_OCVActivity1_adaptiveThreshold
                                                                                         jlong matAddr) {
     // get Mat from raw address
     Mat &mat = *(Mat *) matAddr;
-    cv::cvtColor(mat, mat, cv::COLORMAP_JET);
+
+    Point2f srcTri[3];
+    srcTri[0] = Point2f(0.f, 0.f);
+    srcTri[1] = Point2f(mat.cols - 1.f, 0.f);
+    srcTri[2] = Point2f(0.f, mat.rows - 1.f);
+
+    Point2f dstTri[3];
+    dstTri[0] = Point2f(0.f, mat.rows * 0.5f);
+    dstTri[1] = Point2f(mat.cols * 0.85f, mat.rows * 0.25f);
+    dstTri[2] = Point2f(mat.cols * 0.15f, mat.rows * 0.7f);
+
+    Mat warp_mat = getAffineTransform(srcTri, dstTri);
+    Mat warp_dst = Mat::zeros(mat.rows, mat.cols, mat.type());
+    warpAffine(mat, mat, warp_mat, mat.size());
 }
 }
