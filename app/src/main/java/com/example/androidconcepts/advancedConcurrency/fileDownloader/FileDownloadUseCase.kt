@@ -4,9 +4,6 @@ import androidx.annotation.WorkerThread
 import com.example.androidconcepts.common.BgThreadPoster
 import com.example.androidconcepts.common.UiThreadPoster
 import java.util.concurrent.Future
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
 class FileDownloadUseCase constructor(
     private val bgThreadPoster: BgThreadPoster = BgThreadPoster(),
@@ -20,23 +17,23 @@ class FileDownloadUseCase constructor(
     private val cachedFiles: HashMap<String, DownloadedFile> =
         hashMapOf() // concurrent hashmap doesn't work here for some reason but synchronized does.
 
-    private val lock: Lock = ReentrantLock()
+    private val MONITOR = Any()
+
+    private val currentlyDownloadingFiles = mutableListOf<String>()
 
     fun startDownloadFileAsync(file: File, listener: Listener): Future<*> = bgThreadPoster.post {
-        lateinit var file1: DownloadedFile
+        waitIfSameFileIsDownloading(file.name)
 
-        // problem : this block of code is synchronized even when the file names are different,
-        // this hurts performance by a great extent as the downloading io task also gets synchronized.
-        lock.withLock {
-            val downloadedFile = getFromCacheOrDownloadFile(file)
+        currentlyDownloadingFiles.add(file.name)
+        val downloadedFile = getFromCacheOrDownloadFile(file)
+        currentlyDownloadingFiles.remove(file.name)
 
-            if (downloadedFile != null)
-                file1 = downloadedFile
-        }
+        notifyAllMonitors()
 
-        uiThreadPoster.post {
-            listener.onFileResult(file1)
-        }
+        if (downloadedFile != null)
+            uiThreadPoster.post {
+                listener.onFileResult(downloadedFile)
+            }
     }
 
     @WorkerThread
@@ -53,5 +50,19 @@ class FileDownloadUseCase constructor(
         }
 
         return null // error case
+    }
+
+    private fun notifyAllMonitors() {
+        synchronized(MONITOR) {
+            (MONITOR as Object).notifyAll()
+        }
+    }
+
+    private fun waitIfSameFileIsDownloading(fileName: String) {
+        synchronized(MONITOR) {
+            while (currentlyDownloadingFiles.contains(fileName)) {
+                (MONITOR as Object).wait()
+            }
+        }
     }
 }

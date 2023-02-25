@@ -59,6 +59,27 @@ class FileDownloadUseCaseTest {
         }
     }
 
+    @Test
+    fun performanceTestWhenDownloadingFiveDifferentFiles() {
+        // arrange
+        val semaphore = Semaphore(-4)
+
+        // act
+        repeat(5) {
+            Thread {
+                val file = File("file$it", "some url$it")
+
+                SUT.startDownloadFileAsync(file, object : FileDownloadUseCase.Listener {
+                    override fun onFileResult(downloadedFile: DownloadedFile) {
+                        semaphore.release()
+                    }
+                })
+            }.start()
+        }
+
+        semaphore.acquire() // should be less than 2.5 secs (500 * 5)
+    }
+
     private lateinit var SUT: FileDownloadUseCase
     private lateinit var fileDownloader: FileDownloaderTD
 
