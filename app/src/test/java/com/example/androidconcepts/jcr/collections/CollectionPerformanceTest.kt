@@ -1,74 +1,121 @@
 package com.example.androidconcepts.jcr.collections
 
+import com.example.androidconcepts.common.measureTime
 import org.junit.Test
 import java.util.LinkedList
-import kotlin.math.exp
+import java.util.TreeSet
 
+/**
+ * important link : https://www.geeksforgeeks.org/hashset-vs-treeset-in-java/
+ */
 class CollectionPerformanceTest {
 
-    private val TenPow6 = 1000000
+    private val tenPower6 = 1000000 // gives out of java heap for greater than this
 
     @Test
     fun arrayListTest() {
         val arrayList = mutableListOf<Int>()
-        repeat(TenPow6) { // 10^6
-            arrayList.add(it)
-        } // 20ms
+        measureTime {
+            repeat(tenPower6) {
+                arrayList.add(it)
+            } // 20ms
+        }
 
-        repeat(1000) {
-            arrayList.add(arrayList.size / 2, it)
-        } // 80ms
+        measureTime {
+            repeat(1000) {
+                arrayList.add(arrayList.size / 2, it)
+            } // 80ms
+        }
 
-        repeat(1000) {
-            arrayList.add(0, it)
-        } // 300ms
+        measureTime {
+            repeat(1000) {
+                arrayList.add(0, it)
+            } // 300ms
+        }
     }
 
     @Test
     fun linkedListTest() {
         val linkedList = LinkedList<Int>()
-        repeat(TenPow6) { // 10^6
-            linkedList.add(it)
-        } // 120ms
 
-        repeat(1000) {
-            linkedList.add(linkedList.size / 2, it)
-        } // 1sec
+        measureTime {
+            repeat(tenPower6) { // 10^6
+                linkedList.add(it)
+            } // 120ms
+        }
 
-        repeat(1000) {
-            linkedList.add(0, it)
-        } // 10sec
+        measureTime {
+            repeat(1000) {
+                linkedList.add(linkedList.size / 2, it)
+            } // 1sec
+        }
+
+        measureTime {
+            repeat(1000) {
+                linkedList.add(0, it)
+            } // 10ms
+        }
     }
 
     @Test
     fun hashsetTest() {
-        val hashset = HashSet<Int>() // unique and sorted
+        val hashset = HashSet<Int>() // unique
 
-        repeat(TenPow6) { // 10^6
-            hashset.add(it)
-        } // 85ms
-
-        hashset.clear()
-
-        repeat(20) {
-            hashset.add((0..4).random())
+        measureTime {
+            repeat(tenPower6) { // 10^6
+                hashset.add(it)
+            } // 85ms
         }
 
-        hashset.forEach {
-            println(it)
+        measureTime {
+            repeat(tenPower6) {
+                hashset.contains(it)
+            } // 50ms
         }
     }
 
     @Test
-    fun linkedHashSet() {
-        val linkedHashSet = java.util.LinkedHashSet<Int>() // unique but not sorted
+    fun linkedHashSetTest() {
+        val linkedHashSet = java.util.LinkedHashSet<Int>() // unique
 
-        repeat(20) {
-            linkedHashSet.add((0..4).random())
+        measureTime {
+            repeat(tenPower6) {
+                linkedHashSet.add(it)
+            } // 100ms
         }
 
-        linkedHashSet.forEach {
-            println(it)
+        measureTime {
+            repeat(tenPower6) {
+                linkedHashSet.contains(it)
+            } // 180ms
+        }
+    }
+
+    @Test
+    fun treeSetTest() {
+        val treeSet = TreeSet<Int>() // sorted and unique
+
+        measureTime {
+            repeat(tenPower6) {
+                treeSet.add(it)
+            } // 150ms
+        }
+    }
+
+    @Test
+    fun hashmapTest() {
+        val hashmap = HashMap<Int, String>()
+
+        measureTime {
+            repeat(tenPower6) {
+                hashmap[it] = it.toString()
+            } // 150ms
+        }
+
+        measureTime {
+            repeat(tenPower6) {
+                hashmap[it]
+            } // 30ms
         }
     }
 }
