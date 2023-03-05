@@ -1,11 +1,9 @@
 package com.example.androidconcepts.advancedConcurrency.fileDownloader
 
+import androidx.annotation.WorkerThread
 import com.example.androidconcepts.common.BgThreadPoster
 import com.example.androidconcepts.common.UiThreadPoster
 import java.util.concurrent.Future
-import java.util.concurrent.locks.Lock
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 
 class FileDownloadUseCase constructor(
     private val bgThreadPoster: BgThreadPoster = BgThreadPoster(),
@@ -17,31 +15,54 @@ class FileDownloadUseCase constructor(
     }
 
     private val cachedFiles: HashMap<String, DownloadedFile> =
-        hashMapOf() // concurrent hashmap doesn't work here for some reason.
+        hashMapOf() // concurrent hashmap doesn't work here for some reason but synchronized does.
 
-    private val lock: Lock = ReentrantLock()
+    private val MONITOR = Any()
+
+    private val currentlyDownloadingFiles = mutableListOf<String>()
 
     fun startDownloadFileAsync(file: File, listener: Listener): Future<*> = bgThreadPoster.post {
-        lateinit var file1 : DownloadedFile
+        waitIfSameFileIsDownloading(file.name)
 
-        // problem : this block of code is synchronized even when the file names are different,
-        // this hurts performance by a great extent as the downloading io task also gets synchronized.
-        lock.withLock {
-            file1 = getFromCacheOrDownloadFile(file)
-        }
+        currentlyDownloadingFiles.add(file.name)
+        val downloadedFile = getFromCacheOrDownloadFile(file)
+        currentlyDownloadingFiles.remove(file.name)
 
-        uiThreadPoster.post {
-            listener.onFileResult(file1)
-        }
+        notifyAllMonitors()
+
+        if (downloadedFile != null)
+            uiThreadPoster.post {
+                listener.onFileResult(downloadedFile)
+            }
     }
 
-    private fun getFromCacheOrDownloadFile(file: File): DownloadedFile {
+    @WorkerThread
+    private fun getFromCacheOrDownloadFile(file: File): DownloadedFile? {
         if (cachedFiles.contains(file.name)) {
             return cachedFiles[file.name]!!
         }
 
         val downloadedFile = fileDownloader.downloadFileSync(file)
-        cachedFiles[file.name] = downloadedFile
-        return downloadedFile
+
+        if (downloadedFile.downloadedFile != null) { // is Result.Success didn't work here!
+            cachedFiles[file.name] = downloadedFile.downloadedFile
+            return downloadedFile.downloadedFile
+        }
+
+        return null // error case
+    }
+
+    private fun notifyAllMonitors() {
+        synchronized(MONITOR) {
+            (MONITOR as Object).notifyAll()
+        }
+    }
+
+    private fun waitIfSameFileIsDownloading(fileName: String) {
+        synchronized(MONITOR) {
+            while (currentlyDownloadingFiles.contains(fileName)) {
+                (MONITOR as Object).wait()
+            }
+        }
     }
 }
