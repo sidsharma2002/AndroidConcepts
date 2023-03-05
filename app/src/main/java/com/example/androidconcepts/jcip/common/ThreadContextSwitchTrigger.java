@@ -1,5 +1,7 @@
 package com.example.androidconcepts.jcip.common;
 
+import com.example.androidconcepts.common.BgThreadPoster;
+
 public class ThreadContextSwitchTrigger {
     private Long millis;
 
@@ -15,4 +17,14 @@ public class ThreadContextSwitchTrigger {
             count++;
         }
     }
+
+    public void trigger(Long time) {
+        long finalTime = System.currentTimeMillis() + time;
+        int count = 0;
+        while (System.currentTimeMillis() < finalTime) {
+            Thread.yield();
+            count++;
+        }
+    }
 }
+
