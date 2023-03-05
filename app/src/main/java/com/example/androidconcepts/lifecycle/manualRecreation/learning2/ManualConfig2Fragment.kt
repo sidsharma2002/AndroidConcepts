@@ -20,67 +20,55 @@ class ManualConfig2Fragment : LifecycleLoggerFragment() {
     override val TAG: String
         get() = "config $counter"
 
-    // ui references
-    private var tvHeadline: TextView? = null
-    private var tvBody: TextView? = null
-
     private var isInLandscape: Boolean = false
+    private var viewMvc: ManualConfig2ViewMvc? = null
+
+    private val delayedCallbackUseCase = DelayedCallbackUseCase(BgThreadPoster(), UiThreadPoster())
+    private val delayedDataCallback = DelayedCallbackUseCase.Listener { counter ->
+        viewMvc!!.bindData(counter)
+    }
 
     private val randomNumber = (0..10).random()
     var counter = 1
-
-    private val delayedCallbackUseCase = DelayedCallbackUseCase(BgThreadPoster(), UiThreadPoster())
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         super.onCreateView(inflater, container, savedInstanceState)
 
         isInLandscape =
             requireContext().resources?.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-        return layoutInflater.inflate(R.layout.fragment_manual_config_2, null)
+        viewMvc = if (isInLandscape) {
+            ManualConfig2ViewMvcLandscapeImpl(inflater, counter, randomNumber)
+        } else {
+            ManualConfig2ViewMvcPortraitImpl(inflater, counter, randomNumber)
+        }
+
+        return viewMvc!!.getRootView()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        if (isInLandscape)
-            setupUiForLandscape(view)
-        else
-            setupUiForPortrait(view)
-
-        fetchFibonacciNumbers()
+        viewMvc!!.setupUi()
     }
 
-    private fun fetchFibonacciNumbers() {
-        delayedCallbackUseCase.fetchAsync(3000L) {
-            tvHeadline?.text = "headline fetched"
-
-            // for landscape
-            tvBody?.text = "body fetched"
-        }
+    override fun onStart() {
+        super.onStart()
+        delayedCallbackUseCase.registerListener(delayedDataCallback)
+        delayedCallbackUseCase.fetchAsync(3000L)
     }
 
-    private fun setupUiForPortrait(view: View) {
-        tvHeadline = view.findViewById(R.id.tv3)
-        tvHeadline!!.text = "headline counter : $counter no : $randomNumber"
-    }
-
-    private fun setupUiForLandscape(view: View) {
-        tvHeadline = view.findViewById(R.id.tv3)
-        tvHeadline!!.text = "headline counter : $counter no : $randomNumber"
-
-        tvBody = view.findViewById(R.id.tv4)
-        tvBody!!.text = "body counter"
+    override fun onStop() {
+        super.onStop()
+        delayedCallbackUseCase.unregisterListener(delayedDataCallback)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        tvBody = null
-        tvHeadline = null
+        viewMvc = null // help gc
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
