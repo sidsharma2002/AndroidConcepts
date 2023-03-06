@@ -47,12 +47,9 @@ class ManualConfig2Fragment : LifecycleLoggerFragment() {
             ManualConfig2ViewMvcPortraitImpl(inflater, counter, randomNumber)
         }
 
-        return viewMvc!!.getRootView()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
         viewMvc!!.setupUi()
+
+        return viewMvc!!.getRootView()
     }
 
     override fun onStart() {
@@ -64,11 +61,6 @@ class ManualConfig2Fragment : LifecycleLoggerFragment() {
     override fun onStop() {
         super.onStop()
         delayedCallbackUseCase.unregisterListener(delayedDataCallback)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewMvc = null // help gc
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
