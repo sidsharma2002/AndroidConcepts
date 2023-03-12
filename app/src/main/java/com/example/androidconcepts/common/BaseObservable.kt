@@ -2,17 +2,22 @@ package com.example.androidconcepts.common
 
 import java.util.*
 
-open class BaseObservable<ListenerClass> {
+interface Observable<ListenerClass> {
+    fun registerListener(listener: ListenerClass)
+    fun unregisterListener(listener: ListenerClass)
+}
+
+open class BaseObservable<ListenerClass> : Observable<ListenerClass> {
 
     private val listeners: MutableList<ListenerClass> by lazy {
-        Collections.synchronizedList(listOf())
+        Collections.synchronizedList(mutableListOf())
     }
 
-    fun registerListener(listener: ListenerClass) {
+    override fun registerListener(listener: ListenerClass) {
         this.listeners.add(listener)
     }
 
-    fun unregisterListener(listener: ListenerClass) {
+    override fun unregisterListener(listener: ListenerClass) {
         this.listeners.remove(listener)
     }
 
