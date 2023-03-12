@@ -9,14 +9,14 @@ import com.example.androidconcepts.common.UiThreadPoster
  * An observable data holder used in cases where we want to get a notification of the data when a observer is registered.
  * Typically used in cases where important notifications can miss due to unregistration of observers in onStop().
  *
- * Simple to use as registration doesn't require any viewLifecycleOwner hence it can be used for all purposes and not only as a UI dataHolder.
+ * Simple to use as registration doesn't require any viewLifecycleOwner hence it can be used for all purposes and not only as a UI-DataHolder.
  * Also we don't need to think about which one to use i.e setValue or postValue.
  *
  * @author Siddharth Sharma
  */
 @Suppress("UNCHECKED_CAST")
 class ObservableDataHolder<T> constructor(
-    private val initialValue: T? = null,
+    initialValue: T? = null,
     private val uiThreadPoster: UiThreadPoster = UiThreadPoster()
 ) : EmitOnRegisterObservable<ObservableDataHolder.Observer<T>>(uiThreadPoster) {
 
@@ -70,9 +70,11 @@ class ObservableDataHolder<T> constructor(
             listener.onValueChanged(newData)
     }
 
-    override fun notifyObserverWhenRegistered(listener: Observer<T>) {
-        // don't emit initial value
-        if (data != NOT_SET)
+    override fun notifyObserverOnRegistration(listener: Observer<T>) {
+        if (isNotSet()) return
+
+        uiThreadPoster.post {
             listener.onValueChanged(data as T)
+        }
     }
 }
