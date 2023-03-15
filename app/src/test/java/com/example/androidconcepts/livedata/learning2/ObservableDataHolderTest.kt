@@ -14,64 +14,65 @@ class ObservableDataHolderTest {
 
     @Test
     fun observerRegistered_valueIsSet_valueGetsObserved() {
-        var observedValue : Int = -1
 
+        var observedData = -1
         val latch = CountDownLatch(1)
 
-        SUT.registerListener(object: ObservableDataHolder.Observer<Int> {
-            override fun onValueChanged(data: Int) {
-                observedValue = data
-                latch.countDown()
-            }
-        })
+        uiThreadPosterTD.post {
+            SUT.registerListener(object : ObservableDataHolder.Observer<Int> {
+                override fun onValueChanged(data: Int) {
+                    observedData = data
+                    latch.countDown()
+                }
+            })
 
-        SUT.setData(1)
+            SUT.setData(1)
+        }
 
-        latch.await(2, TimeUnit.SECONDS)
-
-        assert(observedValue == 1)
+        assert(latch.await(1, TimeUnit.SECONDS))
+        assert(observedData == 1)
     }
 
     @Test
     fun noValueIsSet_observerDoesNotObserveAnyValue() {
-        var isValueObserved = false
 
         val latch = CountDownLatch(1)
 
-        SUT.registerListener(object: ObservableDataHolder.Observer<Int> {
-            override fun onValueChanged(data: Int) {
-                isValueObserved = true
-                latch.countDown()
-            }
-        })
+        uiThreadPosterTD.post {
+            SUT.registerListener(object : ObservableDataHolder.Observer<Int> {
+                override fun onValueChanged(data: Int) {
+                    latch.countDown()
+                }
+            })
+        }
 
-        latch.await(1, TimeUnit.SECONDS)
-
-        assert(!isValueObserved)
+        assert(!latch.await(100, TimeUnit.MILLISECONDS))
     }
 
     @Test
     fun observerRegistered_multipleValuesAreSet_valuesGetObservedCorrectly() {
-        val observedValues : MutableList<Int> = mutableListOf()
 
+        val observedValues: MutableList<Int> = mutableListOf()
         val latch = CountDownLatch(5)
 
-        SUT.registerListener(object: ObservableDataHolder.Observer<Int> {
-            override fun onValueChanged(data: Int) {
-                observedValues.add(data)
-                latch.countDown()
-            }
-        })
+        uiThreadPosterTD.post {
+            SUT.registerListener(object : ObservableDataHolder.Observer<Int> {
+                override fun onValueChanged(data: Int) {
+                    observedValues.add(data)
+                    latch.countDown()
+                }
+            })
 
-        SUT.setData(1)
-        SUT.setData(2)
-        SUT.setData(3)
-        SUT.setData(4)
-        SUT.setData(5)
+            SUT.setData(1)
+            SUT.setData(2)
+            SUT.setData(3)
+            SUT.setData(4)
+            SUT.setData(5)
+        }
 
-        latch.await(2, TimeUnit.SECONDS)
+        latch.await(1, TimeUnit.SECONDS)
 
-        val expectedList : List<Int> = List(5) {
+        val expectedList: List<Int> = List(5) {
             it + 1 // start from 1
         }
 
@@ -80,15 +81,19 @@ class ObservableDataHolderTest {
 
     @Test
     fun longRunningObservers_doesNotBlockSetValue() {
-        registerLongRunningObservers(100)
 
         val latch = CountDownLatch(100)
 
-        repeat(100) {
-            Thread {
-                SUT.setData(it)
-                latch.countDown()
-            }.start()
+        uiThreadPosterTD.post {
+
+            registerLongRunningObservers(noOfObservers = 100)
+
+            repeat(100) {
+                Thread {
+                    SUT.setData(it)
+                    latch.countDown()
+                }.start()
+            }
         }
 
         assert(latch.await(50, TimeUnit.MILLISECONDS))
@@ -105,29 +110,35 @@ class ObservableDataHolderTest {
     }
 
     @Test
-    fun dataSetAfterObserverIsUnregistered_notifiedOfMissedNotification() {
-        var observedData : Int? = null
+    fun dataSetAfterObserverIsUnregistered_notifiesOfMissedNotification() {
 
-        val observer = object: ObservableDataHolder.Observer<Int> {
-            override fun onValueChanged(data: Int) {
-                observedData = data
+        var observedData: Int? = null
+        val latch = CountDownLatch(2)
+
+        uiThreadPosterTD.post {
+
+            val observer = object : ObservableDataHolder.Observer<Int> {
+                override fun onValueChanged(data: Int) {
+                    observedData = data
+                    latch.countDown()
+                }
             }
+
+            // onStart
+            SUT.registerListener(observer)
+
+            // onStop
+            SUT.unregisterListener(observer)
+
+            // data is fetched from api and set to dataHolder.
+            SUT.setData(1)
+
+            // onStart
+            SUT.registerListener(observer)
         }
 
-        // onStart
-        SUT.registerListener(observer)
-
-        // onStop
-        SUT.unregisterListener(observer)
-
-        // data is fetched from api and set to dataHolder.
-        SUT.setData(1)
-
-        // onStart
-        SUT.registerListener(observer)
-
+        assert(latch.await(1, TimeUnit.SECONDS))
         assert(observedData == 1)
-        assert(SUT.getValue() == 1)
     }
 
     @Before

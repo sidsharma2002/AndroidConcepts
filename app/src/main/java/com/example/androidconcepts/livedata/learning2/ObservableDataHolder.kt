@@ -3,6 +3,7 @@ package com.example.androidconcepts.livedata.learning2
 import androidx.annotation.GuardedBy
 import com.example.androidconcepts.common.EmitOnRegisterObservable
 import com.example.androidconcepts.common.UiThreadPoster
+import com.example.androidconcepts.livedata.learning2.ObservableDataHolder.*
 
 
 /**
@@ -17,8 +18,9 @@ import com.example.androidconcepts.common.UiThreadPoster
 @Suppress("UNCHECKED_CAST")
 class ObservableDataHolder<T> constructor(
     initialValue: T? = null,
+    private val notifyOnRegistration: Boolean = true,
     private val uiThreadPoster: UiThreadPoster = UiThreadPoster()
-) : EmitOnRegisterObservable<ObservableDataHolder.Observer<T>>(uiThreadPoster) {
+) : EmitOnRegisterObservable<Observer<T>>(uiThreadPoster) {
 
     interface Observer<T> {
         fun onValueChanged(data: T)
@@ -62,7 +64,9 @@ class ObservableDataHolder<T> constructor(
     }
 
     fun isNotSet(): Boolean {
-        return data == NOT_SET
+        synchronized(LOCK) {
+            return data == NOT_SET
+        }
     }
 
     private fun notifyAllListeners(newData: T) {
@@ -71,7 +75,8 @@ class ObservableDataHolder<T> constructor(
     }
 
     override fun notifyObserverOnRegistration(listener: Observer<T>) {
-        if (isNotSet()) return
+
+        if (isNotSet() || !notifyOnRegistration) return
 
         uiThreadPoster.post {
             listener.onValueChanged(data as T)
