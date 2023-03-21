@@ -1,13 +1,13 @@
 package com.example.androidconcepts.opencv.learning1
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.androidconcepts.R
-import com.google.android.material.slider.RangeSlider
 import com.google.android.material.slider.Slider
 import com.google.android.material.slider.Slider.OnSliderTouchListener
 import org.opencv.android.BaseLoaderCallback
@@ -16,34 +16,21 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener
 import org.opencv.android.LoaderCallbackInterface
 import org.opencv.android.OpenCVLoader
 import org.opencv.core.*
-import org.opencv.core.Mat.eye
 import org.opencv.imgproc.Imgproc
-import java.util.concurrent.Executors
-import kotlin.concurrent.thread
+import org.opencv.objdetect.CascadeClassifier
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
 
 
 class OCVActivity1 : AppCompatActivity() {
 
     private var cameraView: CameraBridgeViewBase? = null
 
-    private val mLoaderCallback: BaseLoaderCallback = object : BaseLoaderCallback(this) {
-        override fun onManagerConnected(status: Int) {
-            when (status) {
-                SUCCESS -> {
-                    Log.i("opencv", "OpenCV loaded successfully")
-                    cameraView?.enableView()
-                }
-                else -> {
-                    super.onManagerConnected(status)
-                }
-            }
-        }
-    }
-
-    @Volatile
     private var mValue: Int = 0
-
     private lateinit var slider: Slider
+    private lateinit var faceDetector: CascadeClassifier
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,27 +60,44 @@ class OCVActivity1 : AppCompatActivity() {
         cameraView!!.visibility = CameraBridgeViewBase.VISIBLE
 
         cameraView!!.setCvCameraViewListener(object : CvCameraViewListener {
-            override fun onCameraViewStarted(width: Int, height: Int) {
-
-            }
-
-            override fun onCameraViewStopped() {
-
-            }
 
             override fun onCameraFrame(inputFrame: Mat?): Mat {
                 // get current camera frame as OpenCV Mat object
                 val mat = inputFrame ?: return Mat()
 
                 // convert to grayscale
-                Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY)
+                //Imgproc.cvtColor(mat, mat, Imgproc.COLOR_RGB2GRAY)
+
+                // rotate to portrait mode
+                val matRot = Imgproc.getRotationMatrix2D(Point(mat.cols() /2.0 , mat.rows()/2.0), -90.0, 1.0)
+                Imgproc.warpAffine(mat, matRot, matRot, mat.size())
 
                 // main algorithm
-                adaptiveThresholdFromJNI(mat.nativeObjAddr)
+                // adaptiveThresholdFromJNI(mat.nativeObjAddr)
+
+                val matOfRect = MatOfRect()
+
+                if (::faceDetector.isInitialized) {
+
+                    faceDetector.detectMultiScale(
+                        /* image = */ matRot,
+                        /* objects = */ matOfRect,
+                        /* scaleFactor = */ 1.5,
+                        /* minNeighbors = */ 5
+                    )
+
+                    if (matOfRect.size(0) > 0)
+                        Log.d(TAG, "face detection ${matOfRect.size()}")
+                } else {
+                    Log.d(TAG, "no detector initialized")
+                }
 
                 // return processed frame for live preview
-                return mat
+                return matRot
             }
+
+            override fun onCameraViewStarted(width: Int, height: Int) {}
+            override fun onCameraViewStopped() {}
         })
     }
 
@@ -139,6 +143,51 @@ class OCVActivity1 : AppCompatActivity() {
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS)
         }
     }
+
+    private val mLoaderCallback: BaseLoaderCallback = object : BaseLoaderCallback(this) {
+        override fun onManagerConnected(status: Int) {
+            when (status) {
+                SUCCESS -> {
+                    Log.i("opencv", "OpenCV loaded successfully")
+
+                    try {
+                        val inputStream: InputStream = resources.openRawResource(R.raw.haarcascade_frontalface_alt)
+                        val cascadeDir: File = getDir("cascade", Context.MODE_PRIVATE)
+                        val mCascadeFile = File(cascadeDir, "haarcascade_frontalface_alt.xml")
+                        val os = FileOutputStream(mCascadeFile)
+                        val buffer = ByteArray(4096)
+                        var bytesRead: Int
+
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            os.write(buffer, 0, bytesRead)
+                        }
+
+                        inputStream.close()
+                        os.close()
+
+                        faceDetector = CascadeClassifier(mCascadeFile.absolutePath)
+
+                        if (faceDetector.empty()) {
+                            Log.e(TAG, "Failed to load cascade classifier")
+                        } else Log.i(TAG, "Loaded cascade classifier from " + mCascadeFile.absolutePath)
+
+                        cascadeDir.delete()
+
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        Log.e(TAG, "Failed to load cascade. Exception thrown: $e")
+                    }
+
+                    cameraView?.enableView()
+                }
+
+                else -> {
+                    super.onManagerConnected(status)
+                }
+            }
+        }
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
