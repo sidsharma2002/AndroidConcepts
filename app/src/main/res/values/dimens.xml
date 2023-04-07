@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="neopop_def_space">8dp</dimen>
+    <dimen name="neopop_def_space">6dp</dimen>
 </resources>
