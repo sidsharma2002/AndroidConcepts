@@ -1,13 +1,18 @@
-package com.example.androidconcepts.ui.viewGroup
+package com.example.androidconcepts.ui.retroDesign
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import com.example.androidconcepts.R
 
 
@@ -32,11 +37,11 @@ class RetroLayout constructor(
     }
 
     private var lastClicked = System.currentTimeMillis()
-
     private val duration = 90L
 
     override fun performClick(): Boolean {
-        if (System.currentTimeMillis() - lastClicked < (duration * 2) + 100L) return false
+        // debounce
+        if (System.currentTimeMillis() - lastClicked < (duration * 2) + /* offset */ 100L) return false
         lastClicked = System.currentTimeMillis()
 
         animateOnClick()
@@ -58,7 +63,9 @@ class RetroLayout constructor(
                 // reset to initial pos
                 contentContainer.animate().translationYBy(-(contentDisplacement))
                     .translationXBy(-(contentDisplacement))
-                    .setDuration(duration)
+                    .setDuration(duration).withEndAction {
+                        //contentContainer.cameraDistance = 0f
+                    }
                     .start()
 
             }.start()
@@ -99,17 +106,20 @@ class RetroLayout constructor(
 
         (contentContainer).addView(view)
 
-        val isMatchParentWidth =
+        val isWidthMatchParent =
             layoutParams.width == android.view.ViewGroup.LayoutParams.MATCH_PARENT
 
-        if (isMatchParentWidth) {
+        if (isWidthMatchParent) {
+            // if match parent then we need to modify some attributes.
             getChildAt(0).layoutParams.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
+
             (contentContainer.layoutParams as ConstraintLayout.LayoutParams).setMargins(
-                0,
-                0,
-                resources.getDimension(R.dimen.neopop_def_space).toInt() - 5,
-                0
+                /* left = */ 0,
+                /* top = */ 0,
+                /* right = */ resources.getDimension(R.dimen.neopop_def_space).toInt() - 5,
+                /* bottom = */ 0
             )
+
             contentContainer.layoutParams.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
             invalidate()
         }
