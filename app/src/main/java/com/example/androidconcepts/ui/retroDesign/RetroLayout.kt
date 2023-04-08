@@ -35,6 +35,7 @@ class RetroLayout constructor(
         contentContainer = root.findViewById(R.id.cv_content)
         sideShadow = root.findViewById(R.id.view_rightShadow)
         bottomShadow = root.findViewById(R.id.view_bottomShadow)
+        setCardBackgroundColor(Color.TRANSPARENT)
 
         cardElevation = 0f
         isClickable = true
@@ -43,8 +44,24 @@ class RetroLayout constructor(
     private var lastClicked = System.currentTimeMillis()
     private val duration = 90L
 
+    private var shimmer: RetroShimmerView? = null
+
     override fun performClick(): Boolean {
-        Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show()
+
+        val w = contentContainer.width
+        val h = contentContainer.height
+
+        if (shimmer == null) {
+            shimmer = RetroShimmerView(context)
+
+            shimmer!!.layoutParams = LayoutParams(w, h)
+            shimmer!!.elevation = 12f
+
+            contentContainer.addView(shimmer)
+        }
+
+        shimmer?.startAnim(w.toFloat())
+
         return super.performClick()
     }
 
@@ -77,7 +94,6 @@ class RetroLayout constructor(
             contentContainer.layoutParams.width = android.view.ViewGroup.LayoutParams.MATCH_PARENT
             invalidate()
         }
-
     }
 
     private var animUpUnconsumed = false

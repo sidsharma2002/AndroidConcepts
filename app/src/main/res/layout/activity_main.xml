@@ -7,28 +7,9 @@
     android:background="@color/white"
     tools:context=".MainActivity">
 
-    <com.example.androidconcepts.ui.retroDesign.RetroLowElevationLayout
-        android:id="@+id/ll1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="20dp"
-            android:text="ADDED TEXT"
-            android:textColor="@color/black"
-            android:textSize="20dp" />
-
-    </com.example.androidconcepts.ui.retroDesign.RetroLowElevationLayout>
-
     <com.example.androidconcepts.ui.retroDesign.RetroLayout
         android:id="@+id/neopop"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         app:layout_constraintBottom_toBottomOf="parent"
