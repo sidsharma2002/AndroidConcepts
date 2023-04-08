@@ -6,10 +6,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewPropertyAnimator
 import android.widget.TextView
+import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -40,58 +44,8 @@ class RetroLayout constructor(
     private val duration = 90L
 
     override fun performClick(): Boolean {
-        // debounce
-        if (System.currentTimeMillis() - lastClicked < (duration * 2) + /* offset */ 100L) return false
-        lastClicked = System.currentTimeMillis()
-
-        animateOnClick()
-
+        Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show()
         return super.performClick()
-    }
-
-    private fun animateOnClick() {
-
-        val space = context.resources.getDimension(R.dimen.neopop_def_space)
-        val contentDisplacement = 2 * space / 3
-        val shadowDisplacement = space / 3
-
-        contentContainer.animate().translationXBy(contentDisplacement)
-            .translationYBy(contentDisplacement)
-            .setDuration(duration)
-            .withEndAction {
-
-                // reset to initial pos
-                contentContainer.animate().translationYBy(-(contentDisplacement))
-                    .translationXBy(-(contentDisplacement))
-                    .setDuration(duration).withEndAction {
-                        //contentContainer.cameraDistance = 0f
-                    }
-                    .start()
-
-            }.start()
-
-
-        sideShadow.animate().translationXBy(-shadowDisplacement).translationYBy(-shadowDisplacement)
-            .setDuration(duration)
-            .withEndAction {
-
-                // reset to initial pos
-                sideShadow.animate().translationXBy(shadowDisplacement)
-                    .translationYBy(shadowDisplacement).setDuration(duration)
-                    .start()
-
-            }.start()
-
-        bottomShadow.animate().translationYBy(-shadowDisplacement)
-            .translationXBy(-shadowDisplacement)
-            .setDuration(duration).withEndAction {
-
-                // reset to initial pos
-                bottomShadow.animate().translationYBy(shadowDisplacement)
-                    .translationXBy(shadowDisplacement)
-                    .setDuration(duration).start()
-
-            }.start()
     }
 
     override fun onAttachedToWindow() {
@@ -124,6 +78,108 @@ class RetroLayout constructor(
             invalidate()
         }
 
+    }
+
+    private var animUpUnconsumed = false
+
+    enum class STATE {
+        PRESSING, PRESSED, RELEASING, RELEASED
+    }
+
+    private var currState: STATE = STATE.RELEASED
+
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        when (event?.action) {
+
+            MotionEvent.ACTION_DOWN -> {
+
+                if (currState != STATE.RELEASED) return false
+
+                if (System.currentTimeMillis() - lastClicked < (duration * 2) + /* offset */ 100L) return false
+                lastClicked = System.currentTimeMillis()
+
+                animateDown()
+                return true
+            }
+
+            MotionEvent.ACTION_UP -> {
+
+                if (currState == STATE.PRESSING) {
+                    animUpUnconsumed = true
+                    performClick()
+                } else if (currState == STATE.PRESSED) {
+                    animateUp()
+                    performClick()
+                }
+
+                return true
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                if (event.x !in 0f..width.toFloat() || event.y !in 0f..height.toFloat()) {
+
+                    if (currState == STATE.PRESSING) {
+                        animUpUnconsumed = true
+                    } else if (currState == STATE.PRESSED) {
+                        animateUp()
+                    }
+
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
+    private val space = context.resources.getDimension(R.dimen.neopop_def_space)
+    private val contentDisplacement = 2 * space / 3
+    private val shadowDisplacement = space / 3
+
+    private fun animateDown() {
+        contentContainer.animate().translationXBy(contentDisplacement)
+            .translationYBy(contentDisplacement)
+            .setDuration(duration)
+            .withStartAction {
+                currState = STATE.PRESSING
+            }
+            .withEndAction {
+                currState = STATE.PRESSED
+
+                if (animUpUnconsumed)
+                    animateUp()
+            }.start()
+
+        sideShadow.animate().translationXBy(-shadowDisplacement).translationYBy(-shadowDisplacement)
+            .setDuration(duration)
+            .start()
+
+        bottomShadow.animate().translationYBy(-shadowDisplacement)
+            .translationXBy(-shadowDisplacement)
+            .setDuration(duration).start()
+    }
+
+    private fun animateUp() {
+        contentContainer.animate().translationYBy(-(contentDisplacement))
+            .translationXBy(-(contentDisplacement))
+            .setDuration(duration)
+            .withStartAction {
+                currState = STATE.RELEASING
+            }
+            .withEndAction {
+                currState = STATE.RELEASED
+                animUpUnconsumed = false
+            }
+            .start()
+
+        sideShadow.animate().translationXBy(shadowDisplacement)
+            .translationYBy(shadowDisplacement).setDuration(duration)
+            .start()
+
+        bottomShadow.animate().translationYBy(shadowDisplacement)
+            .translationXBy(shadowDisplacement)
+            .setDuration(duration).start()
     }
 
     private val Number.toPx
