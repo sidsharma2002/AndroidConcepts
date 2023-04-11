@@ -29,7 +29,7 @@
                 android:layout_gravity="center"
                 android:padding="20dp"
                 android:paddingEnd="0dp"
-                android:text="BUY"
+                android:text="OKAY"
                 android:textColor="@color/black"
                 android:textSize="20dp"
                 app:layout_constraintStart_toStartOf="parent"

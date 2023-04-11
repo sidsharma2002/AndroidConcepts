@@ -22,10 +22,6 @@ class RetroShimmerView constructor(
     private var shimmerWidth = 0f
     private var isAnimInProgress = false
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-    }
-
     fun startAnim(widthProvided: Float) {
 
         if (isAnimInProgress) return
