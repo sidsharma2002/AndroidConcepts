@@ -39,10 +39,8 @@ class MainActivity : AppCompatActivity() {
 //            this does the main fix, i.e remove currently unintended shown fragment from the fm.
 
 //            supportFragmentManager.beginTransaction().remove(currentFragment).commit()
-//            super.onBackPressed() // or supportFragmentManager.popBackStackImmediate() // to avoid finishing activity.
-//            return
 //        }
 
-        super.onBackPressed()
+        super.onBackPressed() // internally does popBackStackImmediate or finish activity.
     }
 }

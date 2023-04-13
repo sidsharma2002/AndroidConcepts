@@ -20,7 +20,7 @@ class FragProbOneFragment : Fragment() {
 
     var number = 0
 
-    fun getInstance(number: Int): FragProbOneFragment {
+    private fun getInstance(number: Int): FragProbOneFragment {
         return FragProbOneFragment().apply {
             val bundle = Bundle()
             bundle.putInt("number", number)
