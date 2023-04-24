@@ -15,7 +15,6 @@ class LiveDataLearning1BeforeUseCase constructor(
         fun onNumberCached(number: Int)
     }
 
-    @Volatile
     private var cachedNumber: Int? = null  // apart from notifying the cached value to the listeners, we are also storing it.
     private val lock: Any = Any()
 

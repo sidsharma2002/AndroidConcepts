@@ -18,20 +18,31 @@ class PerformMoneyTransactionRxUseCase {
 
     private var disposable: Disposable? = null
 
+    // Doubt : is the corresponding activity/fragment leaked? if yes till when? what about in case this is disposed?
+
     fun performMoneyTransactionAsync(callback: Listener) {
         disposable = Observable.just(1).map {
+
             val result = performMoneyTransferNetworkCalls()
+
             Log.d("debug", "network call result received : $result")
+
             saveResultInDb(result)
+
             return@map "transaction done successfully!"
         }.map {
+
             Log.d("debug", "second map result : $it")
             return@map it
+
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(/* onNext */ { result ->
+
                 Log.d("debug", "subscribe onNext : result $result")
+
                 callback.onSuccess(result)
+
             }, /* onError */ { throwable ->
                 Log.d("debug", "subscribe onError : reason ${throwable.message}")
                 callback.onError(throwable.message ?: "some error occurred!")
