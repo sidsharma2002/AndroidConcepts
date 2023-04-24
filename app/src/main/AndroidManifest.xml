@@ -15,6 +15,27 @@
         android:theme="@style/Theme.AndroidConcepts"
         tools:targetApi="31">
         <activity
+            android:name=".lifecycle.manualRecreation.learning1.ManualConfig1Activity"
+            android:configChanges="orientation|screenLayout|screenSize|keyboardHidden"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+        <activity
+            android:name=".lifecycle.manualRecreation.learning2.ManualConfigActivity2"
+            android:configChanges="orientation|screenLayout|screenSize|keyboardHidden"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".cancellation.rxjava.learning1.RxCancelActivity"
             android:exported="true">
             <meta-data
@@ -45,7 +66,6 @@
         <activity
             android:name=".cancellation.coroutines.learning1.CoroutineCancelActivity"
             android:exported="true">
-
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
