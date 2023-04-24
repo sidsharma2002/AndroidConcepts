@@ -12,7 +12,7 @@ class ManualConfig1Activity : AppCompatActivity() {
     private val TAG = "config ManualConfig1Act"
     private var textView: TextView? = null
 
-    private val randomNumber = (0..10).random()
+    private val randomNumber = (0..10).random() // TODO : test in process death.
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
