@@ -1,4 +1,4 @@
-# AndroidConcepts
+# Android Concepts : Learn By Doing!
 
 My personal learning topic-wise project with inDepth concepts and comments/learning summary. (See unit-tests too)
 Readme is in progress.
