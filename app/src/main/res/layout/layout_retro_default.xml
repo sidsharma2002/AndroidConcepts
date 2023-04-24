@@ -17,6 +17,8 @@
         app:strokeColor="@color/black"
         app:strokeWidth="2dp">
 
+        <!-- all the content will inflated here dynamically -->
+
     </com.google.android.material.card.MaterialCardView>
 
     <View
