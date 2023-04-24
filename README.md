@@ -14,9 +14,14 @@ See Unit-Tests too.
 
 3. ### [Producer Consumer : advanced concurrency](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/advancedConcurrency/producerConsumer)
 
+This is an example of a Producer-Consumer pattern, which is a common design pattern in concurrent programming, Demonstrates how multiple threads can work together in a synchronized manner to complete a complex task, and how the Producer-Consumer pattern can be used to manage shared resources (in this case, dishes) between these threads.
+
 4. ### [Cancellations in Coroutines and RxJava : proper reasoning of why coroutines is hard](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/cancellation)
 5. ### [General Observables](https://github.com/sidsharma2002/AndroidConcepts/blob/main/app/src/main/java/com/example/androidconcepts/common/BaseObservable.kt)
 6. ### [Background thread executors : replacement for simple background work](https://github.com/sidsharma2002/AndroidConcepts/blob/main/app/src/main/java/com/example/androidconcepts/common/BgThreadPoster.kt)
+
+The BgThreadPoster class is useful in situations where you need to perform a time-consuming task in the background, such as loading data from a remote server, without blocking the main thread. Less overengineered than coroutines.
+
 7. ### [Coroutines : benefits + how even coroutines can block and not suspend](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/coroutines)
 8. ### [Java concurrency in practice learnings : advanced concurrency, not for kids](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/jcip)
 9. ### [Livedata : benefits](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/livedata/learning1)
@@ -36,6 +41,9 @@ https://user-images.githubusercontent.com/53833109/233896079-566c138d-a3b4-4e39-
 
 12. ### [Manually handling config changes and not let the activity destroy, Along with strategy-pattern applied on view logic.](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/lifecycle)
 13. ### [Java complete reference : data structure operations with measured time, intresting facts.](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/jcr/collections)
+
+ It creates several large collections (ArrayList, LinkedList, HashSet, TreeSet, HashMap, TreeMap) and measures the time taken to perform various operations like adding and removing elements, iterating over elements, etc. The test is meant to compare the performance of different collections under different scenarios and help developers choose the appropriate collection type for their specific use case.
+
 14. ### [Spamming threads : starting 100s of threads and busting myth that threads are heavy.](https://github.com/sidsharma2002/AndroidConcepts/blob/main/app/src/main/java/com/example/androidconcepts/jcip/extras/AndroidThreadSpammer.kt)
 15. ### [Creating own RxJava like framework](https://github.com/sidsharma2002/AndroidConcepts/tree/main/app/src/main/java/com/example/androidconcepts/rxJava/ownImpl)
 16. ### Problems with fragment and its navigation [wip]
