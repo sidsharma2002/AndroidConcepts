@@ -11,14 +11,17 @@ class PerformMoneyTransactionUseCase {
 
     suspend fun performMoneyTransaction(): String {
         val result = performMoneyTransferNetworkCalls()
+
         Log.d("debug", "network call result received : $result")
+
         saveResultInDb(result)
+
         return "transaction done successfully!"
     }
 
     private suspend fun performMoneyTransferNetworkCalls(): String = withContext(Dispatchers.IO) {
         repeat(5) {
-            Log.d("debug", "$it")
+            Log.d("debug", "itr : $it")
             blockingDelay(1000)
         }
 
