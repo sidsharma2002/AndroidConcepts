@@ -30,17 +30,19 @@ After cancelling the scope, line 2 doesn't executes.
 This means that for a coroutine of format :
         line 1 : suspend_fun1()
         line 2 : // the nature of code doesn't matter here...
-Even if suspend fun1 uses only withContext (any cancellation checking inbuilt function) with blocking and non cooperative code inside it, if the parent scope is cancelled then the line just after fun1 will not execute. 
+Even if suspend fun1 uses only withContext (or any inbuilt cancellation checking function) with blocking and non cooperative code inside it, if the parent scope is cancelled then the line just after fun1 will not execute. 
 Same apply for the functions which checks for isActive() inside them.
 
 -> 
-The fact that one cannot predict the nature of suspend methods (throws cancellation or not, if yes then immediately or after executing blocking code) by just seeing their name makes coroutines very complex.   
+The fact that one cannot predict the nature of suspend methods (throws cancellation or not, if yes then immediately or after executing blocking code) by just seeing their name makes coroutines very complex.
+
+If one catches the cancellation exception of some suspend method then its not predictable that the
+exception will be thrown immediately after cancelling the coroutine or after 5 seconds (suppose you do view binding stuff inside the catch then you encounter typical binding is null exception).
 
 ->
 Few must to perform exercises and questions to think on :
-        1. What happens when we remove withContext from `performMoneyTransferNetworkCalls`
-        2. What happens if we add a suspend method inside `performMoneyTransferNetworkCalls` inside the repeat loop
-        3. What happens if we add a suspend method inside `performMoneyTransferNetworkCalls` after the repeat loop
-        4. Why not use withContext in only `performMoneyTransaction` and not in the child suspend methods to support cancellations.
-
-Its highly recommended to make changes to the code first and see the results for each of the following on his own. [Answers are given in Answers1.md]
+        1. What happens when we remove withContext from `performMoneyTransferNetworkCalls`.
+        2. What happens if we add a suspend method inside `performMoneyTransferNetworkCalls` inside the repeat loop.
+        3. What happens if we add a suspend method inside `performMoneyTransferNetworkCalls` after the repeat loop.
+        4. Why not use withContext in only `performMoneyTransaction` and not in the child suspend methods.
+        5. Remove all withContexts.
