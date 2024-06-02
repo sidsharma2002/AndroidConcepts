@@ -7,43 +7,36 @@
     android:background="@color/white"
     tools:context=".MainActivity">
 
-<!--    <com.example.androidconcepts.ui.retroDesign.RetroLayout-->
-<!--        android:id="@+id/neopop"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_margin="20dp"-->
-<!--        app:layout_constraintBottom_toBottomOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent">-->
+    <EditText
+        android:id="@+id/et_iterations"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="iterations"
+        android:padding="20dp"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintBottom_toTopOf="@id/btn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-<!--        <LinearLayout-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center"-->
-<!--            android:orientation="horizontal">-->
+    <EditText
+        android:id="@+id/et_threads"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="threads"
+        android:padding="20dp"
+        android:layout_marginBottom="40dp"
+        app:layout_constraintBottom_toTopOf="@id/et_iterations"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-<!--            <TextView-->
-<!--                android:id="@+id/tv"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:padding="20dp"-->
-<!--                android:paddingEnd="0dp"-->
-<!--                android:text="OKAY"-->
-<!--                android:textColor="@color/black"-->
-<!--                android:textSize="20dp"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent" />-->
-
-<!--            <ImageView-->
-<!--                android:layout_width="32dp"-->
-<!--                android:layout_height="32dp"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:layout_margin="12dp"-->
-<!--                android:src="@drawable/ic_baseline_arrow_circle_right_24" />-->
-
-<!--        </LinearLayout>-->
-
-<!--    </com.example.androidconcepts.ui.retroDesign.RetroLayout>-->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="start"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
