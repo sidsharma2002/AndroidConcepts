@@ -1,9 +1,13 @@
 package com.example.androidconcepts.coroutines.performance
 
+import com.example.androidconcepts.common.BgThreadPoster
+import com.example.androidconcepts.common.measureTime
 import kotlinx.coroutines.*
 import org.junit.Test
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 
 class CoroutinePerformanceTest {
@@ -97,5 +101,66 @@ class CoroutinePerformanceTest {
         }
 
         joinAll(backgroundJob, userJob)
+    }
+
+    @Test
+    fun performanceTestOfNThreads() {
+        val processImageUseCase = ProcessImageUseCase()
+        val executor = Executors.newFixedThreadPool(8)
+
+        val futures = mutableListOf<Future<*>>()
+
+        measureTime {
+            repeat(1000) {
+                val result = executor.submit {
+                    processImageUseCase.processBlocking(10)
+                }
+
+                futures += result
+            }
+
+            futures.forEach {
+                it.get()
+            }
+        }
+
+        // RESULTS :
+        // 1005 Threads, 1000 repeat, 10ms task time -> 1291 ms
+        // 500 Threads, 1000 repeat, 10ms task time -> 1036 ms
+        // 100 Threads, 1000 repeat, 10ms task time -> 690 ms
+        // 50 Threads, 1000 repeat, 10ms task time -> 649 ms
+        // 8 (no of cores) Threads, 1000 repeat, 10ms task time -> 1262 seconds
+        // 5 Threads, 1000 repeat, 10ms task time -> 2 seconds
+    }
+
+    @Test
+    fun performanceTestOfNThreadedDispatcher() {
+        val processImageUseCase = ProcessImageUseCase()
+        val executor = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
+        val scope = CoroutineScope(executor)
+
+        val jobs = mutableListOf<Job>()
+
+        measureTime {
+            runBlocking {
+                repeat(1000) {
+                    val result = scope.launch {
+                        processImageUseCase.processBlocking(10)
+                    }
+
+                    jobs += result
+                }
+
+                jobs.joinAll()
+            }
+        }
+
+        // RESULTS :
+        // 1005 Threads, 1000 repeat, 10ms task time -> 1344 ms
+        // 500 Threads, 1000 repeat, 10ms task time -> 1056 ms
+        // 100 Threads, 1000 repeat, 10ms task time -> 785 ms
+        // 50 Threads, 1000 repeat, 10ms task time -> 743 ms
+        // 8 (no of cores) Threads, 1000 repeat, 10ms task time -> 1326 seconds
+        // 5 Threads, 1000 repeat, 10ms task time -> 2 seconds
     }
 }

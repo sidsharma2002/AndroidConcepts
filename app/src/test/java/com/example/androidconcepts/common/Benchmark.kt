@@ -5,6 +5,6 @@ fun measureTime(action: () -> Unit): Long {
     action.invoke()
     val endTime = System.currentTimeMillis()
     val measuredTime = endTime - startTime
-    println("measure time = " + measuredTime + "ms")
+    println("measured time = " + measuredTime + "ms")
     return measuredTime
 }
